@@ -20,33 +20,26 @@ class ProductController extends ApiController
 
 
         $search = $request->query('search') ? $request->query('search') : '';
+        $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
         $products = Product::with('category')
             ->where('name', 'LIKE', "%$search%")
-            ->paginate(4);
+            ->paginate($per_page);
 
 
-        $data =  [
-            'pagination' => [
-                'search' => $search,
-                'total'        => $products->total(),
-                'current_page' => $products->currentPage(),
-                'per_page'     => $products->perPage(),
-                'last_page'    => $products->lastPage(),
-                'from'         => $products->firstItem(),
-                'to'           => $products->lastItem(),
-            ],
+        $pagination = $this->parsePaginationJson($products);
+
+
+        return $this->successResponse([
+            'pagination' => $pagination,
             'products' => $products->items()
-        ];
-
-
-        return $this->successResponse($data);
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\Dashboard\StoreProductRequest  $request
+     * @param \App\Http\Requests\Dashboard\StoreProductRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreProductRequest $request)
@@ -64,7 +57,7 @@ class ProductController extends ApiController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Product  $product
+     * @param \App\Models\Product $product
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Product $product)
@@ -80,8 +73,8 @@ class ProductController extends ApiController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\Dashboard\UpdateProductRequest  $request
-     * @param  \App\Models\Product  $product
+     * @param \App\Http\Requests\Dashboard\UpdateProductRequest $request
+     * @param \App\Models\Product $product
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateProductRequest $request, Product $product)
@@ -98,12 +91,12 @@ class ProductController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Product  $product
+     * @param \App\Models\Product $product
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Product $product)
     {
-        if(!$product->delete()){
+        if (!$product->delete()) {
             return response()->json([
                 'message' => 'fail',
             ]);

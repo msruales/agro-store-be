@@ -25,12 +25,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'auth:api', 'prefix' => 'dashboard'], function(){
 
     Route::get('/user', [AuthController::class, 'get_user']);
-
     Route::apiResources([
         'products' => \App\Http\Controllers\Api\v1\Dashboard\ProductController::class,
         'categories' => \App\Http\Controllers\Api\v1\Dashboard\CategoryController::class,
     ]);
+    Route::get('categories/select/categories', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'getAllCategories']);
     Route::post('categories/store_image/{category}', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'store_image']);
+
 
 });
 
