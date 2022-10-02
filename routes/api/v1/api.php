@@ -15,28 +15,49 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-
-    return $request->user();
-
-});
-
-Route::group(['middleware' => 'auth:api', 'prefix' => 'dashboard'], function(){
+Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/user', [AuthController::class, 'get_user']);
     Route::apiResources([
         'products' => \App\Http\Controllers\Api\v1\Dashboard\ProductController::class,
         'categories' => \App\Http\Controllers\Api\v1\Dashboard\CategoryController::class,
+        'clients' => \App\Http\Controllers\Api\v1\Dashboard\ClientController::class,
+        'bills' => \App\Http\Controllers\Api\v1\Dashboard\BillController::class,
+        'users' => \App\Http\Controllers\Api\v1\Dashboard\UserController::class,
+        'tags' => \App\Http\Controllers\Api\v1\Dashboard\TagController::class,
+        'product_tags' => \App\Http\Controllers\Api\v1\Dashboard\ProductTagController::class,
     ]);
+
+    Route::get('tags/select/tags', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'select_tags']);
+
+
+    Route::get('products/select/products', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'select']);
+    Route::get('clients/select/clients', [\App\Http\Controllers\Api\v1\Dashboard\ClientController::class, 'select']);
     Route::get('categories/select/categories', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'getAllCategories']);
+    Route::get('roles/select/roles', [\App\Http\Controllers\Api\v1\Dashboard\RoleController::class, 'roles_for_select']);
+
+    Route::put('products/restore/{id}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'restore']);
+    Route::put('clients/restore/{id}', [\App\Http\Controllers\Api\v1\Dashboard\ClientController::class, 'restore']);
+    Route::put('categories/restore/{id}', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'restore']);
+    Route::put('bills/restore/{id}', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'restore']);
+    Route::put('users/restore/{id}', [\App\Http\Controllers\Api\v1\Dashboard\UserController::class, 'restore']);
+
     Route::post('categories/store_image/{category}', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'store_image']);
+
+    Route::get('statistics/lastSales', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'lastSales']);
+
+    Route::get('statistics/most_sold', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'most_sold_products']);
+
+    Route::post('products/store_tag/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'store_tag']);
+    Route::delete('products/delete_product_tag/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'delete_product_tag']);
+
+    Route::delete('tags/delete_tag_of_article/{tag}', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'delete_tag_of_article']);
 
 
 });
 
 
-Route::group(['namespace' => 'App\Http\Controllers\Api\v1\Auth'], function(){
+Route::group(['namespace' => 'App\Http\Controllers\Api\v1\Auth'], function () {
 
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);

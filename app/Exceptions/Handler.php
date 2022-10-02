@@ -3,14 +3,17 @@
 namespace App\Exceptions;
 
 use App\Traits\ApiResponse;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
     use ApiResponse;
+
     /**
      * A list of the exception types that are not reported.
      *
@@ -44,12 +47,24 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->is('api/*')) {
-                return $this->errorResponse('', 404, 'Record not found');
+                return $this->errorResponse('', 404, 'Record not found.');
             }
         });
-        $this->renderable(function (ModelNotFoundException $e, $request) {
+
+        $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
-                return $this->errorResponse('', 404, 'Model not found');
+                return $this->errorResponse('', 401, 'Unauthenticated.');
+            }
+        });
+
+        $this->renderable(function (ValidationException $e, $request) {
+            if ($request->is('api/*')) {
+                return $this->errorResponse($e->response->original, 422, 'Validation Error.');
+            }
+        });
+        $this->renderable(function (MethodNotAllowedHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return $this->errorResponse('Method is not supported for this route', 405, 'METHOD_NOT_SUPPORTED');
             }
         });
     }

@@ -5,25 +5,35 @@ namespace App\Http\Controllers\Api\v1\Dashboard;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Dashboard\StoreProductRequest;
 use App\Http\Requests\Dashboard\UpdateProductRequest;
+use App\Http\Requests\Product\StoreProductTagRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductController extends ApiController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(Request $request)
+
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
 
+        $status = $request->query('status') ? $request->query('status') : 'active';
 
         $search = $request->query('search') ? $request->query('search') : '';
         $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
         $products = Product::with('category')
-            ->where('name', 'LIKE', "%$search%")
+            ->when($status === 'active', function ($query) use ($search) {
+                $query->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
+            ->when($status === 'all', function ($query) use ($search) {
+                $query->withTrashed()->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
+            ->when($status === 'deleted', function ($query) use ($search) {
+                $query->onlyTrashed()->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
             ->paginate($per_page);
 
 
@@ -36,17 +46,30 @@ class ProductController extends ApiController
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\Dashboard\StoreProductRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(StoreProductRequest $request)
+    public function select(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $search = $request->query('search') ? $request->query('search') : '';
+
+        $products = Product::where('name', 'LIKE', "%$search%")
+            ->with('category')
+            ->orWhereHas('tags', function (Builder $query) use($search) {
+                $query->where('name', 'like', "%$search%");
+            })
+            ->take(8)
+            ->get();
+
+        return $this->successResponse([
+            'products' => $products
+        ]);
+    }
+
+    public function store(StoreProductRequest $request): \Illuminate\Http\JsonResponse
     {
 
         $product = Product::create($request->validated());
-        $product->category;
+        $product->refresh();
+        $product->load('category');
+
         return response()->json([
             'message' => 'ok',
             'product' => $product
@@ -54,15 +77,9 @@ class ProductController extends ApiController
 
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show(Product $product)
+    public function show(Product $product): \Illuminate\Http\JsonResponse
     {
-        $product->category;
+        $product->load('category');
 
         return response()->json([
             'message' => 'okasd',
@@ -70,17 +87,11 @@ class ProductController extends ApiController
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\Dashboard\UpdateProductRequest $request
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product): \Illuminate\Http\JsonResponse
     {
 
         $product->update($request->validated());
+        $product->load('category');
 
         return response()->json([
             'message' => 'ok',
@@ -88,21 +99,46 @@ class ProductController extends ApiController
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy(Product $product)
+    public function destroy(Product $product): \Illuminate\Http\JsonResponse
     {
         if (!$product->delete()) {
-            return response()->json([
-                'message' => 'fail',
-            ]);
+            return $this->errorResponse();
         }
-        return response()->json([
-            'message' => 'ok',
-        ]);
+        return $this->successResponse();
+    }
+
+    public function restore($id): \Illuminate\Http\JsonResponse
+    {
+        $category = Product::withTrashed()->findOrFail($id);
+
+        if (!$category->restore()) {
+            return $this->errorResponse();
+        }
+
+        return $this->successResponse();
+    }
+
+    public function store_tag(StoreProductTagRequest $request, Product $product): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validated();
+
+        $product->tags()->attach($data['id']);
+
+        $product->refresh();
+
+        return $this->successResponse($product);
+
+    }
+
+    public function delete_product_tag(StoreProductTagRequest $request, Product $product): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validated();
+
+        $product->tags()->detach($data['id']);
+
+        $product->refresh();
+
+        return $this->successResponse($product);
+
     }
 }

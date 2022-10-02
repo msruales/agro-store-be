@@ -11,19 +11,27 @@ use Illuminate\Http\Request;
 
 class CategoryController extends ApiController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(Request $request)
+
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
+        $status = $request->query('status') ? $request->query('status') : 'active';
 
         $search = $request->query('search') ? $request->query('search') : '';
         $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
         $categories = Category::with('products')
-            ->where('name', 'LIKE', "%$search%")
+            ->when($status === 'active', function ($query) use ($search) {
+                $query->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
+            ->when($status === 'all', function ($query) use ($search) {
+                $query->withTrashed()->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
+            ->when($status === 'deleted', function ($query) use ($search) {
+                $query->onlyTrashed()->where('name', 'LIKE', "%$search%")
+                    ->orderBy('id', 'desc');
+            })
             ->paginate($per_page);
 
         $pagination = $this->parsePaginationJson($categories);
@@ -34,13 +42,8 @@ class CategoryController extends ApiController
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\Dashboard\StoreCategoryRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(StoreCategoryRequest $request)
+
+    public function store(StoreCategoryRequest $request): \Illuminate\Http\JsonResponse
     {
 
         $category = Category::create($request->validated());
@@ -51,13 +54,8 @@ class CategoryController extends ApiController
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Category $category
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show(Category $category)
+
+    public function show(Category $category): \Illuminate\Http\JsonResponse
     {
 
         $category->image;
@@ -70,7 +68,7 @@ class CategoryController extends ApiController
 
     public function getAllCategories(): \Illuminate\Http\JsonResponse
     {
-        $categories = Category::all();
+        $categories = Category::orderBy('id', 'desc')->get();
 
         return $this->successResponse([
             'categories' => $categories
@@ -102,17 +100,8 @@ class CategoryController extends ApiController
 
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\Dashboard\UpdateCategoryRequest $request
-     * @param \App\Models\Category $category
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category): \Illuminate\Http\JsonResponse
     {
-
-            $category_id=$_POST['categoryId'];
 
         $category->update($request->validated());
 
@@ -123,22 +112,24 @@ class CategoryController extends ApiController
 
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Category $category
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy(Category $category)
+
+    public function destroy(Category $category): \Illuminate\Http\JsonResponse
     {
         if (!$category->delete()) {
-            return response()->json([
-                'message' => 'fail',
-            ]);
+            return $this->errorResponse();
         }
 
-        return response()->json([
-            'message' => 'ok'
-        ]);
+        return $this->successResponse();
+    }
+
+    public function restore($id): \Illuminate\Http\JsonResponse
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+
+        if (!$category->restore()) {
+            return $this->errorResponse();
+        }
+
+        return $this->successResponse();
     }
 }

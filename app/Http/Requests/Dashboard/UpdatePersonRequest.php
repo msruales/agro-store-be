@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Dashboard;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class RegisterRequest extends FormRequest
+class UpdatePersonRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,7 +17,6 @@ class RegisterRequest extends FormRequest
     {
         return true;
     }
-
     function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         if ($this->expectsJson()) {
@@ -34,10 +33,12 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-            'role_id' => ['required'],
-            'email' => "required|email|unique:persons",
-            'password' => 'required'
+            'full_name' => 'required',
+            'email' => 'nullable',
+            'document_type' => 'nullable',
+            'document_number' => 'nullable',
+            'direction' => 'nullable',
+            'phone_number' => 'nullable'
         ];
     }
 }

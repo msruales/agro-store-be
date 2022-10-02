@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Dashboard;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class RegisterRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,8 +34,12 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
             'role_id' => ['required'],
+            'full_name' => ['required'],
+            'document_type' => "required | in:RUC,CI",
+            'document_number' => "required|unique:persons",
+            'direction' => "required",
+            'phone_number' => "required",
             'email' => "required|email|unique:persons",
             'password' => 'required'
         ];

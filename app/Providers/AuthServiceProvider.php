@@ -27,7 +27,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         if (! $this->app->routesAreCached()) {
-            Passport::routes();
+            Passport::routes(null, ['prefix' => 'api/oauth']);
             Passport::tokensExpireIn(now()->addDays(15));
         }
     }

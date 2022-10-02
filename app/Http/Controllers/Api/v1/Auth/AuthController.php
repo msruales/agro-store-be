@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Person;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,51 +15,89 @@ use function response;
 class AuthController extends ApiController
 {
 
-    public function get_user() {
-
+    public function get_user(): \Illuminate\Http\JsonResponse
+    {
         return $this->successResponse([
             'user' => Auth::user(),
         ]);
     }
 
-    public function login(LoginRequest $request) {
+    public function login(LoginRequest $request): \Illuminate\Http\JsonResponse
+    {
 
+        $data = $request->validated();
 
-        if(!Auth::attempt($request->validated())){
+        if(!$person = Person::where('email', $data['email'])->with('user')->first()){
+            return $this->errorResponse([
+                'msg' => 'CREDENTIALS_INVALID',
+            ],401);
+        }
 
-            return response()->json([
-                'message' => 'Credentials invalid'
-            ], 401);
+        $user = $person->user;
+
+        if(!$this->login_by_user($user, $data['password'])){
+            return $this->errorResponse([
+                'msg' => 'CREDENTIALS_INVALID',
+            ],401);
         }
 
         $token = Auth::user()->createToken('MyTokenAppVivero')->accessToken;
 
-        return response()->json([
+        return $this->successResponse([
             'user' => Auth::user(),
             'token' => $token
-        ], 200 );
+        ]);
 
     }
 
-    public function register(RegisterRequest $request){
+    public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
+    {
 
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        $data['password'] = Hash::make($data['password']);
+            $person = new Person();
 
-        $user = User::create($data);
+            $person->email = $data['email'];
 
-        $token = $user->createToken('MyTokenAppVivero')->accessToken;
+            $person->save();
 
-        return response()->json([
-            'message' => 'ok',
-            'token' => $token,
-            'user' => $user
-        ], 200 );
+            $user = new User();
+
+            $user->password = Hash::make($data['password']);
+            $user->user_name = $data['name'];
+            $user->role_id = $data['role_id'];
+
+            $person->user()->save($user);
+
+            $token = $user->createToken('MyTokenAppVivero')->accessToken;
+
+            return $this->successResponse([
+                'message' => 'ok',
+                'token' => $token,
+                'user' => $user
+            ]);
+
+        }catch (\Exception $e){
+            return $this->errorResponse($e->getMessage());
+        }
+
 
     }
 
-    public function logout(){
+    public function login_by_user(User $user, $password): bool
+    {
+
+        if (Hash::check($password, $user->password)) {
+            Auth::loginUsingId($user->id);
+            return true;
+        }
+
+        return false;
+    }
+
+    public function logout()
+    {
 
 
     }
