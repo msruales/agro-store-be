@@ -53,6 +53,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::delete('tags/delete_tag_of_article/{tag}', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'delete_tag_of_article']);
 
+    Route::get('dashboard/total/products', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_products']);
+    Route::get('dashboard/total/clients', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_clients']);
 
 });
 

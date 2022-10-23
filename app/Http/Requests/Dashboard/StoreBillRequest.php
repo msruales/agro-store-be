@@ -36,8 +36,10 @@ class StoreBillRequest extends FormRequest
         return [
             'client_id' => 'required',
             'type_voucher' => 'required',
+            'type_pay' => 'required|in:credit,debit',
             'serial_voucher' => 'required',
             'num_voucher' => 'required',
+            'notes' => 'nullable',
             'tax' => 'required',
             'utility' => 'required',
             'total' => 'required',

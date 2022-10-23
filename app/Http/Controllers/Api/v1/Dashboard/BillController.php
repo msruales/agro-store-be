@@ -18,37 +18,37 @@ class BillController extends ApiController
         $status = $request->query('status') ? $request->query('status') : 'active';
 
         $search = $request->query('search') ? $request->query('search') : '';
-        $column_filter = $request->query('type_search') ? $request->query('type_search') : 'full_name';
+        $type_search = $request->query('type_search') ? $request->query('type_search') : 'all';
         $date = $request->query('date') ? $request->query('date') : '';
         $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
         $bills = Bill::with('client')
             ->with('details')
-            ->when($status === 'active', function ($query) use ($search, $date, $column_filter) {
-                $query->when($date !== '', function ($query) use ($date) {
-                    return $query->whereDate('date', $date);
-                })
-                    ->whereRelation('client', $column_filter, 'LIKE', "%$search%");
+//            ->when($status === 'active', function ($query) use ($search, $date) {
+//                $query->when($date !== '', function ($query) use ($date) {
+//                    return $query->whereDate('date', $date);
+//                });
+//            })
+            ->when($status === 'all', function ($query) use ($search, $date) {
+                $query->withTrashed();
             })
-            ->when($status === 'all', function ($query) use ($search, $date, $column_filter) {
-                $query->withTrashed()->when($date !== '', function ($query) use ($date) {
-                    return $query->whereDate('date', $date);
-                })
-                    ->whereRelation('client', $column_filter, 'LIKE', "%$search%");
+            ->when($status === 'deleted', function ($query) use ($search, $date) {
+                $query->onlyTrashed();
             })
-            ->when($status === 'deleted', function ($query) use ($search, $date, $column_filter) {
-                $query->onlyTrashed()->when($date !== '', function ($query) use ($date) {
-                    return $query->whereDate('date', $date);
-                })
-                    ->whereRelation('client', $column_filter, 'LIKE', "%$search%");
+            ->when($date !== '', function ($query) use ($date) {
+                return $query->whereDate('date', $date);
             })
+            ->when($type_search !== 'all', function ($query) use ($type_search) {
+                $query->where('type_pay', strtoupper($type_search));
+            })
+            ->whereRelation('client', 'full_name', 'LIKE', "%$search%")
+            ->OrWhereRelation('client', 'document_number', 'LIKE', "%$search%")
             ->orderBy('id', 'desc')
             ->paginate($per_page);
 
         $pagination = $this->parsePaginationJson($bills);
 
         return $this->successResponse([
-            'filter' => $column_filter,
             'pagination' => $pagination,
             'bills' => $bills->items(),
         ]);
@@ -63,6 +63,15 @@ class BillController extends ApiController
 
         $data['date'] = $date_now;
         $data['user_id'] = $request->user()->id;
+
+
+        if ($data['type_pay'] === 'credit') {
+            $data['status'] = 'UNPAID';
+        } else {
+            $data['status'] = 'PAID';
+        }
+
+        $data['type_pay'] =  strtoupper($data['type_pay']);
 
         $new_bill = Bill::create($data);
 

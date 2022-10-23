@@ -21,7 +21,7 @@ class PersonSeeder extends Seeder
             'full_name' => 'Admin'
         ]);
         DB::table('persons')->insert([
-            'id' => 2,
+            'id' => 29,
             'document_type' => "RUC",
             'document_number' => "9999999999999",
             'email' => 'consumidor@consumidor.com',

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api\v1\Dashboard;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Controller;
 use App\Models\DetailBill;
+use App\Models\Person;
+use App\Models\Product;
 use Carbon\Carbon;
 
 class DashboardController extends ApiController
@@ -34,5 +35,18 @@ class DashboardController extends ApiController
             })->take(5);
 
         return $this->successResponse($products);
+    }
+
+    public function total_products(): \Illuminate\Http\JsonResponse
+    {
+        $products = Product::all()->count();
+
+        return $this->successResponse($products);
+    }
+
+    public function total_clients(): \Illuminate\Http\JsonResponse
+    {
+        $clients = Person::all()->count();
+        return $this->successResponse($clients);
     }
 }

@@ -44,7 +44,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-
     public function person(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Person::class);
@@ -63,6 +62,5 @@ class User extends Authenticatable
     protected $appends = [
         'email'
     ];
-
 
 }
