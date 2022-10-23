@@ -24,11 +24,6 @@ class BillController extends ApiController
 
         $bills = Bill::with('client')
             ->with('details')
-//            ->when($status === 'active', function ($query) use ($search, $date) {
-//                $query->when($date !== '', function ($query) use ($date) {
-//                    return $query->whereDate('date', $date);
-//                });
-//            })
             ->when($status === 'all', function ($query) use ($search, $date) {
                 $query->withTrashed();
             })
@@ -38,11 +33,14 @@ class BillController extends ApiController
             ->when($date !== '', function ($query) use ($date) {
                 return $query->whereDate('date', $date);
             })
-            ->when($type_search !== 'all', function ($query) use ($type_search) {
+            ->when($type_search !== 'ALL', function ($query) use ($type_search) {
                 $query->where('type_pay', strtoupper($type_search));
             })
-            ->whereRelation('client', 'full_name', 'LIKE', "%$search%")
-            ->OrWhereRelation('client', 'document_number', 'LIKE', "%$search%")
+            ->where(function($query) use ($search){
+                $query->whereRelation('client', 'full_name', 'LIKE', "%$search%")
+                    ->OrWhereRelation('client', 'document_number', 'LIKE', "%$search%");
+            })
+
             ->orderBy('id', 'desc')
             ->paginate($per_page);
 
