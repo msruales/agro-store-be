@@ -18,7 +18,7 @@ class BillController extends ApiController
         $status = $request->query('status') ? $request->query('status') : 'active';
 
         $search = $request->query('search') ? $request->query('search') : '';
-        $type_search = $request->query('type_search') ? $request->query('type_search') : 'all';
+        $type_search = $request->query('type_search') ? $request->query('type_search') : 'ALL';
         $date = $request->query('date') ? $request->query('date') : '';
         $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
