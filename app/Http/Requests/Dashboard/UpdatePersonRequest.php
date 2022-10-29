@@ -33,7 +33,8 @@ class UpdatePersonRequest extends FormRequest
     public function rules()
     {
         return [
-            'full_name' => 'required',
+            'first_name' => ['required'],
+            'last_name' => ['required'],
             'email' => 'nullable',
             'document_type' => 'nullable',
             'document_number' => 'nullable',

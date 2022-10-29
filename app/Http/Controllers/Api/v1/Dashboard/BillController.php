@@ -37,7 +37,9 @@ class BillController extends ApiController
                 $query->where('type_pay', strtoupper($type_search));
             })
             ->where(function($query) use ($search){
-                $query->whereRelation('client', 'full_name', 'LIKE', "%$search%")
+                $query->whereRelation('client', function ($query) use( $search) {
+                    $query->whereRaw("concat(first_name, ' ', last_name) like '%" . $search . "%' ");
+                })
                     ->OrWhereRelation('client', 'document_number', 'LIKE', "%$search%");
             })
 

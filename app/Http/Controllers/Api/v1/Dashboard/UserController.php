@@ -14,19 +14,19 @@ class UserController extends ApiController
 {
     function index(Request $request)
     {
-        $status = $request->query('status') ? $request->query('status') : 'active';
+        $status = $request->query('status') ? $request->query('status') : '';
         $search = $request->query('search') ? $request->query('search') : '';
         $per_page = $request->query('per_page') ? $request->query('per_page') : '10';
 
         $users = User::
-        when($status === 'active', function ($query) use ($search) {
-            $query->whereRelation('person', 'full_name', 'LIKE', "%$search%");
+        when($status === 'all', function ($query) use ($search) {
+            $query->withTrashed();
         })
-            ->when($status === 'all', function ($query) use ($search) {
-                $query->withTrashed()->whereRelation('person', 'full_name', 'LIKE', "%$search%");
-            })
             ->when($status === 'deleted', function ($query) use ($search) {
-                $query->onlyTrashed()->whereRelation('person', 'full_name', 'LIKE', "%$search%");
+                $query->onlyTrashed();
+            })
+            ->whereRelation('person', function($query) use($search){
+                $query->whereRaw("concat(first_name, ' ', last_name) like '%" . $search . "%' ");
             })
             ->orderBy('id', 'desc')
             ->paginate($per_page);
@@ -47,7 +47,8 @@ class UserController extends ApiController
 
             $person = new Person();
 
-            $person->full_name = $data['full_name'];
+            $person->first_name = $data['first_name'];
+            $person->last_name = $data['last_name'];
             $person->document_type = $data['document_type'];
             $person->document_number = $data['document_number'];
             $person->direction = $data['direction'];
@@ -92,7 +93,8 @@ class UserController extends ApiController
             $user->password = Hash::make($data_validated['password']);
         }
 
-        $user->person->full_name = $data_validated['full_name'];
+        $user->person->first_name = $data_validated['first_name'];
+        $user->person->last_name = $data_validated['last_name'];
         $user->person->document_type = $data_validated['document_type'];
         $user->person->document_number = $data_validated['document_number'];
         $user->person->email = $data_validated['email'];

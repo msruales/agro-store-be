@@ -36,7 +36,8 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'role_id' => ['required'],
-            'full_name' => ['required'],
+            'first_name' => ['required'],
+            'last_name' => ['required'],
             'document_type' => "required | in:RUC,CI",
             'email' => ['required','email',Rule::unique('persons', 'email')->ignore($this->route('user')->person->id)],
             'document_number' => ['required',Rule::unique('persons', 'document_number')->ignore($this->route('user')->person->id)],

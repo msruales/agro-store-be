@@ -35,7 +35,8 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'role_id' => ['required'],
-            'full_name' => ['required'],
+            'first_name' => ['required'],
+            'last_name' => ['required'],
             'document_type' => "required | in:RUC,CI",
             'document_number' => "required|unique:persons",
             'direction' => "required",

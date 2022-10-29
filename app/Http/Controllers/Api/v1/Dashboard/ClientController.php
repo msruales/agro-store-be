@@ -9,6 +9,7 @@ use App\Http\Requests\Dashboard\UpdateBillRequest;
 use App\Http\Requests\Dashboard\UpdatePersonRequest;
 use App\Models\Person;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 
 class ClientController extends ApiController
@@ -23,13 +24,13 @@ class ClientController extends ApiController
 
         $persons = Person::
         when($status === 'active', function ($query) use ($search) {
-            $query->where('full_name', 'LIKE', "%$search%");
+            $query->whereRaw("concat(first_name, ' ', last_name) like '%" . $search . "%' ");
         })
             ->when($status === 'all', function ($query) use ($search) {
-                $query->withTrashed()->where('full_name', 'LIKE', "%$search%");
+                $query->withTrashed()->whereRaw("concat(first_name, ' ', last_name) like '%" . $search . "%' ");
             })
             ->when($status === 'deleted', function ($query) use ($search) {
-                $query->onlyTrashed()->where('full_name', 'LIKE', "%$search%");
+                $query->onlyTrashed()->whereRaw("concat(first_name, ' ', last_name) like '%" . $search . "%' ");
             })
             ->orderBy('id', 'desc')
             ->paginate($per_page);
@@ -47,7 +48,7 @@ class ClientController extends ApiController
     {
         $search = $request->query('search') ? $request->query('search') : '';
 
-        $clients = Person::select(['id', 'full_name'])->get();
+        $clients = Person::select('first_name','last_name','id')->get();
 
         return $this->successResponse($clients);
     }

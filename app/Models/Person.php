@@ -14,10 +14,18 @@ class Person extends Model
     protected $table = 'persons';
     protected $primaryKey ='id';
     protected $keyType = 'string';
-    protected $fillable = ['id','full_name', 'email', 'document_type', 'document_number', 'direction', 'phone_number'];
+    protected $fillable = ['id','first_name','last_name', 'email', 'document_type', 'document_number', 'direction', 'phone_number'];
+
+    protected $appends = [
+        'full_name'
+    ];
 
     public function user()
     {
         return $this->hasOne(User::class, 'person_id');
+    }
+
+    public function getFullNameAttribute() {
+        return "{$this->first_name} {$this->last_name}";
     }
 }

@@ -18,14 +18,16 @@ class PersonSeeder extends Seeder
         DB::table('persons')->insert([
             'id' => 1,
             'email' => 'admin@admin.com',
-            'full_name' => 'Admin'
+            'first_name' => 'Admin',
+            'last_name' => ''
         ]);
         DB::table('persons')->insert([
-            'id' => 29,
+            'id' => 2,
             'document_type' => "RUC",
             'document_number' => "9999999999999",
             'email' => 'consumidor@consumidor.com',
-            'full_name' => 'Consumidor Final'
+            'first_name' => 'Consumidor',
+            'last_name' => 'Final'
         ]);
     }
 }
