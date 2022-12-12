@@ -2,29 +2,12 @@
 
 namespace App\Http\Requests\Dashboard;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\CustomFormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class StoreProductRequest extends FormRequest
+class StoreProductRequest extends CustomFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-
-    function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
-    {
-        if ($this->expectsJson()) {
-            $response = new Response($validator->errors(), 422);
-            throw new ValidationException($validator, $response);
-        }
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -34,13 +17,20 @@ class StoreProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
+            'name' => ['required', 'unique:products'],
             'description' => ['nullable'],
             'cost' => ['required'],
             'price' => ['required'],
             'stock' => ['required', 'integer'],
-            'category_id' => ['required']
+            'category_id' => ['required'],
 
+            'elements' => 'nullable|array',
+            'elements.*.id' => 'required|numeric',
+            'elements.*.type' => 'nullable|in:PRIMARY,SECONDARY,OTHER',
+
+            'tags' => 'nullable|array',
+            'tags.*.id' => 'required|numeric',
+            'tags.*.color' => 'nullable',
         ];
     }
 }

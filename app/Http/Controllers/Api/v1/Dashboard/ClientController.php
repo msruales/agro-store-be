@@ -56,7 +56,11 @@ class ClientController extends ApiController
     public function store(StorePersonRequest $request): \Illuminate\Http\JsonResponse
     {
 
-        $new_person = Person::create($request->validated());
+        $data_validated = $request->validated();
+        $data_validated['first_name'] = strtoupper($data_validated['first_name']);
+        $data_validated['last_name'] = strtoupper($data_validated['last_name']);
+
+        $new_person = Person::create($data_validated);
 
         return $this->successResponse(
             [
@@ -77,7 +81,11 @@ class ClientController extends ApiController
 
     public function update(UpdatePersonRequest $request, Person $person): \Illuminate\Http\JsonResponse
     {
-        $person->update($request->validated());
+        $data_validated = $request->validated();
+        $data_validated['first_name'] = strtoupper($data_validated['first_name']);
+        $data_validated['last_name'] = strtoupper($data_validated['last_name']);
+
+        $person->update($data_validated);
 
         return $this->successResponse([
             'message' => 'ok',

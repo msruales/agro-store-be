@@ -46,7 +46,10 @@ class CategoryController extends ApiController
     public function store(StoreCategoryRequest $request): \Illuminate\Http\JsonResponse
     {
 
-        $category = Category::create($request->validated());
+        $data_validated = $request->validated();
+        $data_validated['name'] = strtoupper($data_validated['name']);
+
+        $category = Category::create($data_validated);
 
         return response()->json([
             'message' => 'ok',
@@ -58,7 +61,7 @@ class CategoryController extends ApiController
     public function show(Category $category): \Illuminate\Http\JsonResponse
     {
 
-        $category->image;
+        $category->load('image');
 
         return response()->json([
             'message' => 'ok',
@@ -94,7 +97,7 @@ class CategoryController extends ApiController
 
         $category->image()->save($image);
 
-        $category->image;
+        $category->load('image');
 
         return $this->successResponse($category);
 
@@ -102,8 +105,10 @@ class CategoryController extends ApiController
 
     public function update(UpdateCategoryRequest $request, Category $category): \Illuminate\Http\JsonResponse
     {
+        $data_validated = $request->validated();
+        $data_validated['name'] = strtoupper($data_validated['name']);
 
-        $category->update($request->validated());
+        $category->update($data_validated);
 
         return response()->json([
             'message' => 'ok',

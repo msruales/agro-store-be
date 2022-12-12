@@ -39,7 +39,10 @@ class TagController extends ApiController
 
     public function store(StoreTagRequest $request): \Illuminate\Http\JsonResponse
     {
-        $tag = Tag::create($request->validated());
+        $data_validated = $request->validated();
+        $data_validated['name'] = strtoupper($data_validated['name']);
+
+        $tag = Tag::create($data_validated);
         return $this->successResponse($tag);
     }
 
@@ -61,7 +64,10 @@ class TagController extends ApiController
 
     public function update(UpdateTagRequest $request, Tag $tag): \Illuminate\Http\JsonResponse
     {
-        $tag->update($request->validated());
+        $data_validated = $request->validated();
+        $data_validated['name'] = strtoupper($data_validated['name']);
+
+        $tag->update($data_validated);
         return $this->successResponse($tag);
     }
 

@@ -17,6 +17,7 @@ class ProductTagController extends ApiController
 
     public function store(StoreProductTagRequest $request)
     {
+
         $productTag = ProductTag::create($request->validated());
         return $this->successResponse($productTag);
     }
@@ -34,7 +35,7 @@ class ProductTagController extends ApiController
 
     public function destroy(ProductTag $productTag)
     {
-        if(!$productTag->delete()){
+        if (!$productTag->delete()) {
             return $this->errorResponse();
         }
         return $this->successResponse();

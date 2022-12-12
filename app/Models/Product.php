@@ -14,20 +14,25 @@ class Product extends Model
     protected $table = 'products';
     protected $fillable = ['name', 'description', 'price', 'cost', 'stock', 'status', 'amount', 'category_id'];
 
-    protected $with = ['category','tags'];
+    protected $with = ['category', 'tags'];
 
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id')->withTrashed();
     }
 
-    public function image()
+    public function image(): \Illuminate\Database\Eloquent\Relations\MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
     }
 
-    public function tags()
+    public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'product_tags');
+    }
+
+    public function elements(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Element::class, 'product_element')->withPivot('type');
     }
 }

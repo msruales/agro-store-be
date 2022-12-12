@@ -7,8 +7,14 @@ use Illuminate\Validation\ValidationException;
 
 trait FailedValidationRequest {
 
+    public function authorize()
+    {
+        return true;
+    }
+
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
+
         if ($this->expectsJson()) {
             $response = new Response($validator->errors(), 422);
             throw new ValidationException($validator, $response);

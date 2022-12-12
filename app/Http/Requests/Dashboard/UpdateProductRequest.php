@@ -39,7 +39,15 @@ class UpdateProductRequest extends FormRequest
             'price' => ['required'],
             'cost' => ['required'],
             'stock' => ['required', 'integer'],
-            'category_id' => ['required']
+            'category_id' => ['required'],
+
+            'elements' => 'nullable|array',
+            'elements.*.id' => 'required|numeric',
+            'elements.*.type' => 'nullable|in:PRIMARY,SECONDARY,OTHER',
+
+            'tags' => 'nullable|array',
+            'tags.*.id' => 'required|numeric',
+            'tags.*.color' => 'nullable',
         ];
     }
 }

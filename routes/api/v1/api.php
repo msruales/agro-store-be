@@ -25,6 +25,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'bills' => \App\Http\Controllers\Api\v1\Dashboard\BillController::class,
         'users' => \App\Http\Controllers\Api\v1\Dashboard\UserController::class,
         'tags' => \App\Http\Controllers\Api\v1\Dashboard\TagController::class,
+        'elements' => \App\Http\Controllers\Api\v1\Dashboard\ElementController::class,
         'product_tags' => \App\Http\Controllers\Api\v1\Dashboard\ProductTagController::class,
     ]);
 
@@ -55,6 +56,14 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('dashboard/total/products', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_products']);
     Route::get('dashboard/total/clients', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_clients']);
+
+    Route::post('products/store_element/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'store_element']);
+
+    Route::get('elements/all/elements', [\App\Http\Controllers\Api\v1\Dashboard\ElementController::class, 'all']);
+
+    Route::get('elements/show/byElement/{element}/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ElementController::class, 'showProductByElement']);
+
+    Route::get('products/show/elements/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'showElementsByProduct']);
 
 });
 
