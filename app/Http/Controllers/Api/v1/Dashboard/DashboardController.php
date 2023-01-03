@@ -21,7 +21,7 @@ class DashboardController extends ApiController
 
         $products = DetailBill::select('product_id')->
         with(['product' => function ($query) {
-            $query->select('id', 'name');
+            $query->select('id', 'name')->withTrashed();
         }])
 //            ->whereBetween('created_at', [$startWeek, $endWeek])->get()->groupBy('product_id')
             ->where('created_at', '>=', $last_seven_days)
