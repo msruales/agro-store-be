@@ -27,12 +27,14 @@ Route::group(['middleware' => 'auth:api'], function () {
         'tags' => \App\Http\Controllers\Api\v1\Dashboard\TagController::class,
         'elements' => \App\Http\Controllers\Api\v1\Dashboard\ElementController::class,
         'product_tags' => \App\Http\Controllers\Api\v1\Dashboard\ProductTagController::class,
+        'orders'=>\App\Http\Controllers\Api\v1\Dashboard\OrderController::class,
     ]);
 
     Route::get('tags/select/tags', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'select_tags']);
 
 
     Route::get('products/select/products', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'select']);
+    Route::get('products/select/all_products', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'selectAll']);
     Route::get('clients/select/clients', [\App\Http\Controllers\Api\v1\Dashboard\ClientController::class, 'select']);
     Route::get('categories/select/categories', [\App\Http\Controllers\Api\v1\Dashboard\CategoryController::class, 'getAllCategories']);
     Route::get('roles/select/roles', [\App\Http\Controllers\Api\v1\Dashboard\RoleController::class, 'roles_for_select']);
@@ -56,6 +58,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('dashboard/total/products', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_products']);
     Route::get('dashboard/total/clients', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'total_clients']);
+    Route::get('dashboard/utility', [\App\Http\Controllers\Api\v1\Dashboard\DashboardController::class, 'utilityFor']);
 
     Route::post('products/store_element/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'store_element']);
 
@@ -64,6 +67,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('elements/show/byElement/{element}/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ElementController::class, 'showProductByElement']);
 
     Route::get('products/show/elements/{product}', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'showElementsByProduct']);
+
+    Route::get('products/download/all', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'download']);
+    Route::get('orders/download/{order}', [\App\Http\Controllers\Api\v1\Dashboard\OrderController::class, 'download']);
 
 });
 

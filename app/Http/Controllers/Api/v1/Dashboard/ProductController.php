@@ -8,6 +8,7 @@ use App\Http\Requests\Dashboard\UpdateProductRequest;
 use App\Http\Requests\Product\StoreProductTagRequest;
 use App\Http\Requests\Product\StoreProductElementRequest;
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -58,6 +59,16 @@ class ProductController extends ApiController
             })
             ->take(8)
             ->get();
+
+        return $this->successResponse([
+            'products' => $products
+        ]);
+    }
+
+    public function selectAll(Request $request): \Illuminate\Http\JsonResponse
+    {
+
+        $products = Product::with('category', 'elements')->get();
 
         return $this->successResponse([
             'products' => $products
@@ -208,4 +219,12 @@ class ProductController extends ApiController
         ])->get();
         return $this->successResponse($elements_withCount);
     }
+
+    public function download(): \Illuminate\Http\Response
+    {
+        $products = Product::all();
+        return Pdf::loadView('pdf.products-pdf', ['products'=>$products])
+            ->stream('productos.pdf');
+    }
+
 }
