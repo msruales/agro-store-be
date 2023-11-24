@@ -1,0 +1,62 @@
+version: '3.7'
+services:
+  app:
+    container_name: store-be
+    build:
+      args:
+        user: sammy
+        uid: 1000
+      context: ./
+      target: production
+    restart: always
+    volumes:
+#      - .:/var/www/html
+      - .env.prod:/var/www/html/.env
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=${APP_ENV}
+      - APP_DEBUG=${APP_DEBUG}
+    networks:
+      - laravel
+    depends_on:
+      - database
+  database:
+    image: 'mysql/mysql-server:8.0'
+    container_name: ${DB_HOST}
+    environment:
+#      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+#      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    restart: always
+    ports:
+      - "33061:3306"
+    volumes:
+      - 'mysql8:/var/lib/mysql'
+      - './docker-compose/db/init.sql:/docker-entrypoint-initdb.d/01init.sql'
+    networks:
+      - laravel
+  pma:
+    image: phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_PORT: ${DB_PORT}
+    depends_on:
+      - database
+    ports:
+      - "8888:80"
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
+volumes:
+  mysql8:
+    driver: local
