@@ -16,7 +16,7 @@ COPY --from=build /usr/bin/composer /usr/bin/composer
 RUN composer install --prefer-dist --no-interaction
 
 COPY docker-compose/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-COPY .env.dev /var/www/html/.env
+
 
 RUN php artisan config:cache && \
     php artisan route:cache && \
@@ -35,12 +35,14 @@ COPY docker-compose/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 COPY --from=build /app /var/www/html
 COPY docker-compose/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-COPY .env.prod /var/www/html/.env
+
 
 WORKDIR /var/www/html
 
 RUN php artisan config:cache && \
     php artisan route:cache && \
+    php artisan key:generate && \
     chmod 777 -R /var/www/html/storage/ && \
     chown -R www-data:www-data /var/www/ && \
     a2enmod rewrite
+
