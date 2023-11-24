@@ -1,8 +1,8 @@
 FROM composer:latest as build
 COPY . /app/
-RUN composer update --prefer-dist --no-dev --optimize-autoloader --no-interaction
+RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
-FROM php:8.1-apache-buster as dev
+FROM php:8.2-apache-buster as dev
 
 ENV APP_ENV=dev
 ENV APP_DEBUG=true
