@@ -22,7 +22,7 @@ class DetailBill extends Model
 
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function bill(): \Illuminate\Database\Eloquent\Relations\BelongsTo
