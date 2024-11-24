@@ -1,4 +1,3 @@
-<body>
 <style>
     body {
         color: #000000;
@@ -10,13 +9,14 @@
         border-spacing: 0;
         width: 100%;
     }
+
     th,
     td {
         padding: 6px 15px;
     }
 
     th {
-        background: #1135ef;
+        background: #42444e;
         color: #fff;
         text-align: left;
     }
@@ -49,33 +49,36 @@
     tr:last-child td:last-child {
         border-bottom-right-radius: 6px;
     }
-
-    header {
-        text-align: center;
-        width: 100%;
-    }
-
 </style>
+<body>
 
 <div class="container">
-    <header >
-        <h1>{{$comercialName}}</h1><br>
-    </header>
-    <h3>Fecha: {{$order->date}}</h3>
+    <h1>Pedido {{$order->date}}</h1>
     <table>
         <thead>
         <tr>
-            <th>Nombre</th>
+            <th>Producto</th>
+{{--            <th>Categoria</th>--}}
+{{--            <th>Costo</th>--}}
             <th>Cantidad</th>
+{{--            <th>Subtotal</th>--}}
         </tr>
         </thead>
         <tbody>
         @foreach($order->details as $detail)
             <tr>
                 <td>{{$detail->product->name}}</td>
-                <td style="text-align: center">{{$detail->quantity}}</td>
+{{--                <td>{{$detail->product->category->name}}</td>--}}
+{{--                <td>$ {{number_format($detail->cost, 2, '.', '')}}</td>--}}
+                <td style="text-align: end">{{$detail->quantity}}</td>
+{{--                <td>$ {{number_format(($detail->cost * $detail->quantity), 2, '.', '')}}</td>--}}
             </tr>
         @endforeach
+{{--        <tr>--}}
+{{--            <td colspan="3"></td>--}}
+{{--            <td><strong>TOTAL:</strong>--}}
+{{--            <td><strong>$ {{number_format($order->total, 2, '.', '')}}</strong>--}}
+{{--        </tr>--}}
         </tbody>
     </table>
 </div>

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Dashboard;
+namespace App\Http\Requests\Tax;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProductRequest extends FormRequest
+class StoreTaxRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,22 +34,10 @@ class UpdateProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
-            'description' => ['nullable'],
-            'price' => ['required'],
-            'cost' => ['required'],
-            'stock' => ['required', 'integer'],
-            'category_id' => ['required'],
-            'have_iva' =>['required'],
-            'have_ice' =>['required'],
-
-            'elements' => 'nullable|array',
-            'elements.*.id' => 'required|numeric',
-            'elements.*.type' => 'nullable|in:PRIMARY,SECONDARY,OTHER',
-
-            'tags' => 'nullable|array',
-            'tags.*.id' => 'required|numeric',
-            'tags.*.color' => 'nullable',
+            'codigo' => 'required',
+            'codigo_porcentaje' => 'required',
+            'tarifa' => 'required',
+            'descripcion' => 'string',
         ];
     }
 }

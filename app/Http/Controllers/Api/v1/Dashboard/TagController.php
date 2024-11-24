@@ -52,6 +52,16 @@ class TagController extends ApiController
         return $this->successResponse($tags);
     }
 
+    public function select_short_tags(): \Illuminate\Http\JsonResponse
+    {
+        $tags = Tag::select('name', 'id', 'color')
+            ->withCount('products')
+            ->has('products')
+            ->orderBy('products_count', 'desc')
+            ->get();
+        return $this->successResponse($tags);
+    }
+
     public function tag_with_products()
     {
         $tags = Tag::select('name', 'id', 'color')->with('products')->get()->all();

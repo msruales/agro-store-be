@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\Auth\AuthController;
+use App\Http\Controllers\Api\v1\Dashboard\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +31,13 @@ Route::group(['middleware' => 'auth:api'], function () {
         'orders'=>\App\Http\Controllers\Api\v1\Dashboard\OrderController::class,
     ]);
 
+    Route::get('bills_by_client', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'billsByClient']);
+    Route::get('final_consumer', [\App\Http\Controllers\Api\v1\Dashboard\ClientController::class, 'get_final_consumer']);
+    Route::get('select-clients-with-email', [\App\Http\Controllers\Api\v1\Dashboard\ClientController::class, 'selectWithEmail']);
+
+
     Route::get('tags/select/tags', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'select_tags']);
+    Route::get('tags/select/short-tags', [\App\Http\Controllers\Api\v1\Dashboard\TagController::class, 'select_short_tags']);
 
 
     Route::get('products/select/products', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'select']);
@@ -70,6 +77,37 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('products/download/all', [\App\Http\Controllers\Api\v1\Dashboard\ProductController::class, 'download']);
     Route::get('orders/download/{order}', [\App\Http\Controllers\Api\v1\Dashboard\OrderController::class, 'download']);
+    Route::post('send-order-by-email/{order}', [\App\Http\Controllers\Api\v1\Dashboard\OrderController::class, 'sendByEmail']);
+
+    Route::post('settings',[SettingController::class, 'storeOrUpdate']);
+    Route::get('settings',[SettingController::class, 'index']);
+
+    Route::post('/upload-template-certificate', [\App\Http\Controllers\Api\v1\Dashboard\TemplateController::class, 'uploadDocx']);
+    Route::get('/info-template', [\App\Http\Controllers\Api\v1\Dashboard\TemplateController::class, 'getInfoTemplate']);
+    Route::delete('/delete-template', [\App\Http\Controllers\Api\v1\Dashboard\TemplateController::class, 'deleteTemplate']);
+
+    Route::get('/variables-template', [\App\Http\Controllers\Api\v1\Dashboard\TemplateController::class, 'getVariablesOfTemplate']);
+
+    Route::post('/generate-certificate/{id}', [\App\Http\Controllers\Api\v1\Dashboard\TemplateController::class, 'generateCertificate']);
+
+    Route::post('/generate-recipe/{id}', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'download']);
+    Route::get('/sales-per-day-by-user', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'totalPerDayByUser']);
+    Route::put('/try-check-invoice/{id}', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'tryCheckInvoice']);
+
+    Route::get('/can-create-invoice', [SettingController::class, 'canCreateInvoice']);
+
+    Route::post('/upload-signature', [SettingController::class, 'uploadSignature']);
+    Route::get('/check-signature', [SettingController::class, 'checkSign']);
+    Route::delete('/delete-signature', [SettingController::class, 'deleteSignature']);
+
+
+
+    Route::get('/taxes', [\App\Http\Controllers\Api\v1\Dashboard\TaxeController::class, 'index']);
+    Route::post('/taxes', [\App\Http\Controllers\Api\v1\Dashboard\TaxeController::class, 'store']);
+    Route::put('/taxes/{id}', [\App\Http\Controllers\Api\v1\Dashboard\TaxeController::class, 'activeSelection']);
+
+
+
 
 });
 
@@ -80,3 +118,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Api\v1\Auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
 
 });
+
+Route::get('/signature/download/{filename}', [\App\Http\Controllers\Api\v1\Dashboard\BillController::class, 'downloadSignature'])
+    ->name('download.signature')
+    ->middleware('signed');

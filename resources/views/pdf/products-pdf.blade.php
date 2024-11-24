@@ -3,7 +3,6 @@
         color: #000000;
         font: 14px/24px "Open Sans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", Sans-Serif;
     }
-
     table {
         border-collapse: separate;
         border-spacing: 0;
@@ -16,7 +15,7 @@
     }
 
     th {
-        background: #42444e;
+        background: #1135ef;
         color: #fff;
         text-align: left;
     }

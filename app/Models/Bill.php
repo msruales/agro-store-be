@@ -24,7 +24,8 @@ class Bill extends Model
         'tax',
         'utility',
         'total',
-        'date'
+        'date',
+        'messages'
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

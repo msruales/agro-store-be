@@ -7,10 +7,10 @@ services:
         user: sammy
         uid: 1000
       context: ./
-      target: production
+      target: dev
     restart: always
-    #    volumes:
-#      - .:/var/www/html
+    volumes:
+      - .:/var/www/html
     ports:
       - "8040:80"
     networks:

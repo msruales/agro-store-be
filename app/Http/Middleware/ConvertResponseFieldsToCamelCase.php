@@ -13,6 +13,8 @@ class ConvertResponseFieldsToCamelCase
     {
 //        TODO NO ESTA IMPLEMENTADO
         $response = $next($request);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Expose-Headers', 'Content-Disposition');
         $content = $response->getContent();
 
         try {

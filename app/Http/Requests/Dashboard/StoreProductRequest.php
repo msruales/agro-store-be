@@ -23,6 +23,8 @@ class StoreProductRequest extends CustomFormRequest
             'price' => ['required'],
             'stock' => ['required', 'integer'],
             'category_id' => ['required'],
+            'have_iva' =>['required'],
+            'have_ice' =>['required'],
 
             'elements' => 'nullable|array',
             'elements.*.id' => 'required|numeric',

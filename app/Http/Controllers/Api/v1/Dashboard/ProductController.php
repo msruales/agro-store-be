@@ -11,6 +11,7 @@ use App\Models\Product;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends ApiController
 {
@@ -48,20 +49,49 @@ class ProductController extends ApiController
         ]);
     }
 
+//    public function select(Request $request): \Illuminate\Http\JsonResponse
+//    {
+//        $search = $request->query('search') ? $request->query('search') : '';
+//
+//        $tags = $request->query('tags') ? $request->query('tags') : [];
+//
+//        $products = Product::where('name', 'LIKE', "%$search%")
+//            ->with('category', 'elements')
+//            ->orWhereHas('tags', function (Builder $query) use ($search) {
+//                $query->where('name', 'like', "%$search%");
+//            })
+//            ->take(8)
+//            ->get();
+//
+//        return $this->successResponse([
+//            'products' => $products
+//        ]);
+//    }
+
     public function select(Request $request): \Illuminate\Http\JsonResponse
     {
-        $search = $request->query('search') ? $request->query('search') : '';
+        $search = $request->query('search', '');
+        $tags = $request->get('tags', []);
 
-        $products = Product::where('name', 'LIKE', "%$search%")
-            ->with('category', 'elements')
-            ->orWhereHas('tags', function (Builder $query) use ($search) {
-                $query->where('name', 'like', "%$search%");
-            })
-            ->take(8)
-            ->get();
+
+        $query = Product::with('category', 'elements');
+
+        if (!empty($search)) {
+            $query->where('name', 'LIKE', "%$search%");
+        }
+
+        if (!empty($tags)) {
+            $query->whereHas('tags', function (Builder $query) use ($tags) {
+                $query->whereIn('name', $tags);
+            });
+        }
+
+        $products = $query->take(8)->get();
 
         return $this->successResponse([
-            'products' => $products
+            'products' => $products,
+            'tags' => $tags,
+            'search' => $search
         ]);
     }
 
@@ -123,6 +153,7 @@ class ProductController extends ApiController
 
     public function update(UpdateProductRequest $request, Product $product): \Illuminate\Http\JsonResponse
     {
+        Log::info('UPDATE_PRODUCT',['info' =>$request]);
         $data_validated = $request->validated();
         $data_validated['name'] = strtoupper($data_validated['name']);
 
@@ -211,7 +242,6 @@ class ProductController extends ApiController
 
     public function showElementsByProduct(Product $product): \Illuminate\Http\JsonResponse
     {
-//        ->having('product_id', '!=', $product->id)
         $elements_withCount = $product->elements()->withCount([
             'products' => function ($query) use ($product) {
                 $query->where('product_id', '!=', $product->id);
